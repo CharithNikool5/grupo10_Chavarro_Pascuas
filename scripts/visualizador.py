@@ -1,53 +1,136 @@
 #!/usr/bin/env python3
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # Para WSL que no tiene pantalla gráfica
+import os
 
-# Cargar datos
-df = pd.read_csv('data/clima.csv')
+# ─── CARGAR DATOS ─────────────────────────────────────────────
+def cargar_datos():
+    anime      = pd.read_csv("data/anime.csv")
+    manga      = pd.read_csv("data/manga.csv")
+    personajes = pd.read_csv("data/personajes.csv")
+    print("✅ Datos cargados correctamente")
+    return anime, manga, personajes
 
-# Crear figura con múltiples gráficas
-fig, axes = plt.subplots(2, 2, figsize=(15, 10))
-fig.suptitle('Análisis de Clima por Ciudades', fontsize=16, fontweight='bold')
+# ─── GRÁFICAS ─────────────────────────────────────────────────
+def grafica_top10_anime(df):
+    """Top 10 anime por score."""
+    top10 = df.nlargest(10, "score")[["title", "score"]].dropna()
 
-# Gráfica 1: Temperaturas
-ax1 = axes[0, 0]
-ax1.bar(df['ciudad'], df['temperatura'], color='#ff6b6b')
-ax1.set_title('Temperatura Actual (°C)')
-ax1.set_ylabel('Temperatura (°C)')
-ax1.tick_params(axis='x', rotation=45)
-ax1.grid(axis='y', alpha=0.3)
+    fig, ax = plt.subplots(figsize=(12, 6))
+    bars = ax.barh(top10["title"], top10["score"], color="steelblue")
+    ax.set_xlabel("Score")
+    ax.set_title("🎬 Top 10 Anime por Score")
+    ax.set_xlim(8, 10)
+    ax.invert_yaxis()
 
-# Gráfica 2: Humedad
-ax2 = axes[0, 1]
-ax2.bar(df['ciudad'], df['humedad'], color='#4ecdc4')
-ax2.set_title('Humedad Relativa (%)')
-ax2.set_ylabel('Humedad (%)')
-ax2.tick_params(axis='x', rotation=45)
-ax2.grid(axis='y', alpha=0.3)
+    # Agregar valor al final de cada barra
+    for bar, score in zip(bars, top10["score"]):
+        ax.text(bar.get_width() + 0.01, bar.get_y() + bar.get_height()/2,
+                f"{score:.2f}", va="center", fontsize=9)
 
-# Gráfica 3: Velocidad del Viento
-ax3 = axes[1, 0]
-ax3.scatter(df['ciudad'], df['velocidad_viento'], s=200, color='#95e1d3')
-ax3.set_title('Velocidad del Viento (km/h)')
-ax3.set_ylabel('Velocidad (km/h)')
-ax3.tick_params(axis='x', rotation=45)
-ax3.grid(alpha=0.3)
+    plt.tight_layout()
+    plt.savefig("data/top10_anime.png", dpi=150)
+    print("💾 Guardado: data/top10_anime.png")
+    plt.close()
 
-# Gráfica 4: Sensación Térmica vs Temperatura
-ax4 = axes[1, 1]
-x = np.arange(len(df))
-width = 0.35
-ax4.bar(x - width/2, df['temperatura'], width, label='Temperatura', color='#ff6b6b')
-ax4.bar(x + width/2, df['sensacion_termica'], width, label='Sensación Térmica', color='#ffa07a')
-ax4.set_title('Temperatura vs Sensación Térmica')
-ax4.set_ylabel('Temperatura (°C)')
-ax4.set_xticks(x)
-ax4.set_xticklabels(df['ciudad'], rotation=45)
-ax4.legend()
-ax4.grid(axis='y', alpha=0.3)
+def grafica_top10_manga(df):
+    """Top 10 manga por score."""
+    top10 = df.nlargest(10, "score")[["title", "score"]].dropna()
 
-plt.tight_layout()
-plt.savefig('data/clima_analysis.png', dpi=300, bbox_inches='tight')
-logger.info("✅ Gráficas guardadas en data/clima_analysis.png")
-plt.show()
+    fig, ax = plt.subplots(figsize=(12, 6))
+    bars = ax.barh(top10["title"], top10["score"], color="coral")
+    ax.set_xlabel("Score")
+    ax.set_title("📚 Top 10 Manga por Score")
+    ax.set_xlim(8, 10)
+    ax.invert_yaxis()
+
+    for bar, score in zip(bars, top10["score"]):
+        ax.text(bar.get_width() + 0.01, bar.get_y() + bar.get_height()/2,
+                f"{score:.2f}", va="center", fontsize=9)
+
+    plt.tight_layout()
+    plt.savefig("data/top10_manga.png", dpi=150)
+    print("💾 Guardado: data/top10_manga.png")
+    plt.close()
+
+def grafica_generos_anime(df):
+    """Géneros más frecuentes en anime."""
+    generos = df["genres"].dropna().str.split(", ").explode()
+    top_generos = generos.value_counts().head(10)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    top_generos.plot(kind="bar", ax=ax, color="mediumseagreen")
+    ax.set_title("🎭 Top 10 Géneros más frecuentes en Anime")
+    ax.set_xlabel("Género")
+    ax.set_ylabel("Cantidad")
+    ax.tick_params(axis='x', rotation=45)
+
+    plt.tight_layout()
+    plt.savefig("data/generos_anime.png", dpi=150)
+    print("💾 Guardado: data/generos_anime.png")
+    plt.close()
+
+def grafica_top10_personajes(df):
+    """Top 10 personajes por favoritos."""
+    top10 = df.nlargest(10, "favorites")[["name", "favorites"]]
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    bars = ax.barh(top10["name"], top10["favorites"], color="mediumpurple")
+    ax.set_xlabel("Favoritos")
+    ax.set_title("👤 Top 10 Personajes más populares")
+    ax.invert_yaxis()
+
+    for bar, fav in zip(bars, top10["favorites"]):
+        ax.text(bar.get_width() + 100, bar.get_y() + bar.get_height()/2,
+                f"{fav:,}", va="center", fontsize=9)
+
+    plt.tight_layout()
+    plt.savefig("data/top10_personajes.png", dpi=150)
+    print("💾 Guardado: data/top10_personajes.png")
+    plt.close()
+
+def grafica_distribucion_scores(df_anime, df_manga):
+    """Comparación de distribución de scores anime vs manga."""
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.hist(df_anime["score"].dropna(), bins=15, alpha=0.6,
+            color="steelblue", label="Anime")
+    ax.hist(df_manga["score"].dropna(), bins=15, alpha=0.6,
+            color="coral", label="Manga")
+
+    ax.set_title("📊 Distribución de Scores: Anime vs Manga")
+    ax.set_xlabel("Score")
+    ax.set_ylabel("Cantidad")
+    ax.legend()
+
+    plt.tight_layout()
+    plt.savefig("data/distribucion_scores.png", dpi=150)
+    print("💾 Guardado: data/distribucion_scores.png")
+    plt.close()
+
+# ─── MAIN ─────────────────────────────────────────────────────
+if __name__ == "__main__":
+    # Verificar que existen los CSVs
+    if not os.path.exists("data/anime.csv"):
+        print("❌ No se encontraron los datos. Ejecuta primero anime_etl.py")
+        exit()
+
+    print("🚀 Generando visualizaciones...\n")
+
+    anime, manga, personajes = cargar_datos()
+
+    grafica_top10_anime(anime)
+    grafica_top10_manga(manga)
+    grafica_generos_anime(anime)
+    grafica_top10_personajes(personajes)
+    grafica_distribucion_scores(anime, manga)
+
+    print("\n✅ Todas las gráficas guardadas en data/")
+    print("\nArchivos generados:")
+    print("  📊 data/top10_anime.png")
+    print("  📊 data/top10_manga.png")
+    print("  📊 data/generos_anime.png")
+    print("  📊 data/top10_personajes.png")
+    print("  📊 data/distribucion_scores.png")
