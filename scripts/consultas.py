@@ -168,4 +168,4 @@ if __name__ == "__main__":
         print("\n" + "="*75 + "\n")
 
     finally:
-        db.close()ñ
+        db.close()
