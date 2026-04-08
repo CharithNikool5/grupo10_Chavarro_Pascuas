@@ -17,5 +17,5 @@ y modelos de Machine Learning.
 | avance_2/ | Docker + Jupyter + Regresión Lineal | 🔄 En progreso |
 
 ## Deploy
-- Streamlit Cloud: https://deploymentmineria1.streamlit.app
+- Streamlit Cloud: https://deploymentmineria-8rlzozmwqvnp8kh8bfbmfg.streamlit.app
 - Base de datos: Supabase (PostgreSQL)
