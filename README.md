@@ -14,7 +14,7 @@ y modelos de Machine Learning.
 | Carpeta | Descripción | Estado |
 |---------|-------------|--------|
 | avance_1/ | ETL + Dashboards Streamlit | ✅ Completado |
-| avance_2/ | Docker + Jupyter + Regresión Lineal | 🔄 En progreso |
+| avance_2/ | Docker + Jupyter + Regresión Lineal | ✅ Completado |
 
 ## Deploy
 - Streamlit Cloud: https://deploymentmineria-8rlzozmwqvnp8kh8bfbmfg.streamlit.app
